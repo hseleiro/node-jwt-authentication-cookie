@@ -10,11 +10,20 @@ const server = express();
 
 // CONFIGURE HEADER INFORMATION
 // Allow request from any source. In real production, this should be limited to allowed origins only
-server.use(cors());
-server.disable("x-powered-by"); //Reduce fingerprinting
+server.use(cors({
+    origin: ['http://localhost:4200/'], // Replace with your frontend domain
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+}));
+server.disable("x-powered-by"); // Reduce fingerprinting
 server.use(cookieParser());
 server.use(express.urlencoded({ extended: false }));
 server.use(express.json());
+
+// Middleware to set Access-Control-Expose-Headers
+server.use((req, res, next) => {
+    res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
+    next();
+});
 
 // === 2 - CONNECT DATABASE ===
 // Set up mongoose's promise to global promise
