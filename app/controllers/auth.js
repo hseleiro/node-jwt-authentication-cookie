@@ -14,20 +14,24 @@ export async function Register(req, res) {
         });
         // Check if user already exists
         const existingUser = await User.findOne({ email });
+
         if (existingUser)
             return res.status(400).json({
                 status: "failed",
                 data: [],
                 message: "It seems you already have an account, please log in instead.",
             });
+
         const savedUser = await newUser.save(); // save new user into the database
         const { role, ...user_data } = savedUser._doc;
+
         res.status(200).json({
             status: "success",
             data: [user_data],
             message:
                 "Thank you for registering with us. Your account has been successfully created.",
         });
+
     } catch (err) {
         res.status(500).json({
             status: "error",
@@ -42,9 +46,11 @@ export async function Register(req, res) {
 export async function Login(req, res) {
     // Get variables for the login process
     const { email } = req.body;
+
     try {
         // Check if user exists
         const user = await User.findOne({ email }).select("+password");
+
         if (!user)
             return res.status(401).json({
                 status: "failed",
@@ -57,6 +63,7 @@ export async function Login(req, res) {
             `${req.body.password}`,
             user.password
         );
+
         // if not valid, return unathorized response
         if (!isPasswordValid)
             return res.status(401).json({
@@ -72,12 +79,14 @@ export async function Login(req, res) {
             secure: true,
             sameSite: "None",
         };
+
         const token = user.generateAccessJWT(); // generate session token for user
         res.cookie("SessionID", token, options); // set the token to response header, so that the client sends it back on each subsequent request
         res.status(200).json({
             status: "success",
             message: "You have successfully logged in.",
         });
+
     } catch (err) {
         res.status(500).json({
             status: "error",
